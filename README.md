@@ -13,7 +13,7 @@
  * run one instance, open http://<docker ip>:8080/facete2 in your browser:
 
 
-    docker run -d -p 8080:8080 --name facete2 facete2
+    docker run -d -p 8080:8080 -p 80:80 --name facete2 facete2
 
  * run many times, open http://<docker ip>:<container port>/facete2 in your browser:
 

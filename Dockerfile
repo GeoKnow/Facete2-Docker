@@ -11,6 +11,15 @@ RUN echo "deb http://archive.ubuntu.com/ubuntu/ trusty main restricted universe 
 
 RUN apt-get update
 RUN apt-get -y install postgresql supervisor wget openjdk-7-jdk dialog libterm-readline-gnu-perl
+
+RUN apt-get install -qy apache2 libapache2-mod-proxy-html && \
+	apt-get install -qy apache2-mpm-prefork apache2-utils  && \
+	apt-get install -qy libapache2-mod-authnz-external git
+
+RUN a2enmod proxy proxy_ajp 
+
+ADD 000-default.conf /etc/apache2/sites-available/000-default.conf
+
 #dialog libterm-readline-gnu-perl
 RUN echo "deb http://cstadler.aksw.org/repos/apt precise main contrib non-free" > /etc/apt/sources.list.d/cstadler.aksw.org.list
 RUN wget -O - http://cstadler.aksw.org/repos/apt/conf/packages.precise.gpg.key | apt-key add -
@@ -30,16 +39,22 @@ RUN wget -O /usr/share/java/tomcat-dbcp-7.0.30.jar http://search.maven.org/remot
 #RUN service postgresql stop
 
 # workaround SHMMAX problem of postgresql in some envs
-# RUN sed -ie "s&^shared_buffers =.*&shared_buffers = 16MB&" "/etc/postgresql/9.3/main/postgresql.conf"
+RUN sed -ie "s&^shared_buffers =.*&shared_buffers = 16MB&" "/etc/postgresql/9.3/main/postgresql.conf"
 
 # configure supervisord
 RUN mkdir -p /etc/supervisor/conf.d
 ADD supervisord.conf /etc/supervisor/conf.d/supervisord.conf
 ADD etc.tomcat7.default /etc/default/tomcat7
+ADD server.xml /etc/tomcat7/server.xml
+
+# setup people demo
+#RUN mkdir /tmp/odple; git clone https://github.com/GeoKnow/Jassa-Core.git /tmp/odple; mv /tmp/odple/demo/facet-typeahead-odple /var/www/html/bww-personen; rm -rf /tmp/odple
+ADD Jassa-Core/demo/facet-typeahead-odple /var/www/html/bww-personen
 
 RUN mkdir -p /opt/facete2/exports/
 RUN chmod 777 /opt/facete2/exports
 
 EXPOSE 8080
+EXPOSE 80
 
 CMD ["/usr/bin/supervisord"]
