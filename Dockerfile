@@ -47,10 +47,6 @@ ADD supervisord.conf /etc/supervisor/conf.d/supervisord.conf
 ADD etc.tomcat7.default /etc/default/tomcat7
 ADD server.xml /etc/tomcat7/server.xml
 
-# setup people demo
-#RUN mkdir /tmp/odple; git clone https://github.com/GeoKnow/Jassa-Core.git /tmp/odple; mv /tmp/odple/demo/facet-typeahead-odple /var/www/html/bww-personen; rm -rf /tmp/odple
-ADD Jassa-Core/demo/facet-typeahead-odple /var/www/html/bww-personen
-
 RUN mkdir -p /opt/facete2/exports/
 RUN chmod 777 /opt/facete2/exports
 
