@@ -10,30 +10,49 @@ RUN echo "deb http://archive.ubuntu.com/ubuntu/ trusty main restricted universe 
     echo "deb http://archive.ubuntu.com/ubuntu/ trusty-security main restricted universe multiverse" >> /etc/apt/sources.list
 
 RUN apt-get update
-RUN apt-get -y install postgresql supervisor wget openjdk-7-jdk dialog libterm-readline-gnu-perl
+
+RUN apt-get -y install postgresql supervisor wget openjdk-7-jdk dialog libterm-readline-gnu-perl git 
+RUN apt-get -y install maven software-properties-common
+RUN add-apt-repository -y ppa:chris-lea/node.js
+RUN apt-get update
+RUN apt-get install -y nodejs
 
 RUN apt-get install -qy apache2 libapache2-mod-proxy-html && \
 	apt-get install -qy apache2-mpm-prefork apache2-utils  && \
-	apt-get install -qy libapache2-mod-authnz-external git
-
-RUN a2enmod proxy proxy_ajp 
-
-ADD 000-default.conf /etc/apache2/sites-available/000-default.conf
+	apt-get install -qy libapache2-mod-authnz-external
 
 #dialog libterm-readline-gnu-perl
-RUN echo "deb http://cstadler.aksw.org/repos/apt precise main contrib non-free" > /etc/apt/sources.list.d/cstadler.aksw.org.list
-RUN wget -O - http://cstadler.aksw.org/repos/apt/conf/packages.precise.gpg.key | apt-key add -
+#RUN echo "deb http://cstadler.aksw.org/repos/apt precise main contrib non-free" > /etc/apt/sources.list.d/cstadler.aksw.org.list
+#RUN wget -O - http://cstadler.aksw.org/repos/apt/conf/packages.precise.gpg.key | apt-key add -
 
-# ADD answers/answers
-RUN echo "force-confold" >> /etc/dpkg/dpkg.cfg
-RUN echo "force-confdef" >> /etc/dpkg/dpkg.cfg
-RUN apt-get update
+#RUN echo "force-confold" >> /etc/dpkg/dpkg.cfg
+#RUN echo "force-confdef" >> /etc/dpkg/dpkg.cfg
+#RUN apt-get update
 
-ADD install_facete2.sh /install_facete2.sh
-RUN chmod +x /install_facete2.sh
-RUN /install_facete2.sh
+RUN npm install -g bower grunt grunt-cli
+
+RUN adduser facete --ingroup sudo
+RUN mkdir /build
+RUN chown facete /build
+#USER facete
+WORKDIR /build
+RUN su - facete -c "cd /build && git clone https://github.com/GeoKnow/Facete2"
+WORKDIR /build/Facete2
+RUN su - facete -c "cd /build/Facete2 && mvn package"
+
+WORKDIR /
+
+RUN a2enmod proxy proxy_ajp 
+ADD 000-default.conf /etc/apache2/sites-available/000-default.conf
+
 RUN wget -P /usr/share/tomcat7/lib/ http://repo1.maven.org/maven2/postgresql/postgresql/8.4-701.jdbc4/postgresql-8.4-701.jdbc4.jar
 RUN wget -O /usr/share/java/tomcat-dbcp-7.0.30.jar http://search.maven.org/remotecontent?filepath=org/apache/tomcat/tomcat-dbcp/7.0.30/tomcat-dbcp-7.0.30.jar
+
+# install facete
+RUN apt-get install -qy dbconfig-common xsltproc tomcat7
+ADD install_facete2.sh /install_facete2.sh
+RUN chmod +x /install_facete2.sh
+RUN ./install_facete2.sh
 #RUN service postgresql start
 #RUN apt-get -y install facete2-tomcat7
 #RUN service postgresql stop
