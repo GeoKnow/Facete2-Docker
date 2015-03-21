@@ -33,12 +33,14 @@ RUN npm install -g bower grunt grunt-cli
 
 RUN adduser facete --ingroup sudo
 RUN mkdir /build
-RUN chown facete /build
-#USER facete
+RUN chown -R facete:sudo /build
 WORKDIR /build
+#ADD Facete2 /build/Facete2
 RUN su - facete -c "cd /build && git clone https://github.com/GeoKnow/Facete2"
+# RUN su - facete -c "cd /build/Facete2 && git checkout feature/i18n"
 WORKDIR /build/Facete2
-RUN su - facete -c "cd /build/Facete2 && mvn package"
+
+RUN chown -R facete:sudo /build && su - facete -c "cd /build/Facete2 && mvn package"
 
 WORKDIR /
 
