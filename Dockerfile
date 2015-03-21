@@ -28,24 +28,35 @@ RUN apt-get install -qy apache2 libapache2-mod-proxy-html && \
 #RUN echo "force-confdef" >> /etc/dpkg/dpkg.cfg
 #RUN apt-get update
 
-RUN mkdir /build
-WORKDIR /build
-RUN git clone https://github.com/GeoKnow/Facete2
-WORKDIR /build/Facete2
 RUN npm install -g bower grunt grunt-cli
-RUN mvn package
+
+RUN adduser facete --ingroup sudo
+RUN mkdir /build
+RUN chown facete /build
+#USER facete
+WORKDIR /build
+RUN su - facete -c "cd /build && git clone https://github.com/GeoKnow/Facete2"
+WORKDIR /build/Facete2
+RUN su - facete -c "cd /build/Facete2 && mvn package"
+
+WORKDIR /
 
 ADD 000-default.conf /etc/apache2/sites-available/000-default.conf
-RUN ln -sf /etc/apache2/sites-enabled/000-default.conf /etc/apache2/sites-available/000-default.conf
 
 RUN wget -P /usr/share/tomcat7/lib/ http://repo1.maven.org/maven2/postgresql/postgresql/8.4-701.jdbc4/postgresql-8.4-701.jdbc4.jar
 RUN wget -O /usr/share/java/tomcat-dbcp-7.0.30.jar http://search.maven.org/remotecontent?filepath=org/apache/tomcat/tomcat-dbcp/7.0.30/tomcat-dbcp-7.0.30.jar
+
+# install facete
+RUN apt-get install -qy dbconfig-common xsltproc tomcat7
+ADD install_facete2.sh /install_facete2.sh
+RUN chmod +x /install_facete2.sh
+RUN ./install_facete2.sh
 #RUN service postgresql start
 #RUN apt-get -y install facete2-tomcat7
 #RUN service postgresql stop
 
 # workaround SHMMAX problem of postgresql in some envs
-# RUN sed -ie "s&^shared_buffers =.*&shared_buffers = 16MB&" "/etc/postgresql/9.3/main/postgresql.conf"
+RUN sed -ie "s&^shared_buffers =.*&shared_buffers = 16MB&" "/etc/postgresql/9.3/main/postgresql.conf"
 
 # configure supervisord
 RUN mkdir -p /etc/supervisor/conf.d
