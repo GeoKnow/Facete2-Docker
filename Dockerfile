@@ -11,7 +11,7 @@ RUN echo "deb http://archive.ubuntu.com/ubuntu/ trusty main restricted universe 
 
 RUN apt-get update
 
-RUN apt-get -y install postgresql supervisor wget openjdk-7-jdk dialog libterm-readline-gnu-perl git 
+RUN apt-get -y install postgresql supervisor wget openjdk-7-jdk dialog libterm-readline-gnu-perl git
 RUN apt-get -y install maven software-properties-common
 RUN add-apt-repository -y ppa:chris-lea/node.js
 RUN apt-get update
@@ -37,14 +37,14 @@ RUN chown -R facete:sudo /build
 WORKDIR /build
 #ADD Facete2 /build/Facete2
 RUN su - facete -c "cd /build && git clone https://github.com/GeoKnow/Facete2"
-# RUN su - facete -c "cd /build/Facete2 && git checkout feature/i18n"
+#RUN su - facete -c "cd /build/Facete2 && git checkout feature/i18n && git pull"
 WORKDIR /build/Facete2
 
-RUN chown -R facete:sudo /build && su - facete -c "cd /build/Facete2 && mvn package"
+RUN chown -R facete:sudo /build && su - facete -c "cd /build/Facete2/facete2-webapp && ./bower-update.sh; cd /build/Facete2 && mvn package"
 
 WORKDIR /
 
-RUN a2enmod proxy proxy_ajp 
+RUN a2enmod proxy proxy_ajp
 ADD 000-default.conf /etc/apache2/sites-available/000-default.conf
 
 RUN wget -P /usr/share/tomcat7/lib/ http://repo1.maven.org/maven2/postgresql/postgresql/8.4-701.jdbc4/postgresql-8.4-701.jdbc4.jar
