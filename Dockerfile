@@ -1,8 +1,15 @@
-FROM eccenca/baseimage:1.0.1
+FROM ubuntu:14.04
 
 MAINTAINER René Pietzsch <rpietzsch@gmail.com>
 
 RUN export DEBIAN_FRONTEND=noninteractive
+
+# OP#3182 : set the locale
+# http://jaredmarkell.com/docker-and-locales/
+RUN locale-gen en_US.UTF-8
+ENV LANG en_US.UTF-8
+ENV LANGUAGE en_US:en
+ENV LC_ALL en_US.UTF-8
 
 RUN echo "deb http://archive.ubuntu.com/ubuntu/ trusty main restricted universe multiverse" > /etc/apt/sources.list && \
     echo "deb http://archive.ubuntu.com/ubuntu/ trusty-updates main restricted universe multiverse" >> /etc/apt/sources.list && \
