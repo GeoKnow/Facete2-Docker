@@ -50,6 +50,15 @@ ADD 000-default.conf /etc/apache2/sites-available/000-default.conf
 RUN wget -P /usr/share/tomcat7/lib/ http://repo1.maven.org/maven2/postgresql/postgresql/8.4-701.jdbc4/postgresql-8.4-701.jdbc4.jar
 RUN wget -O /usr/share/java/tomcat-dbcp-7.0.30.jar http://search.maven.org/remotecontent?filepath=org/apache/tomcat/tomcat-dbcp/7.0.30/tomcat-dbcp-7.0.30.jar
 
+# certificate workaround
+RUN \
+	mkdir /etc/ssl/private-copy; \ 
+	mv /etc/ssl/private/* /etc/ssl/private-copy/; \
+	rm -r /etc/ssl/private; \
+	mv /etc/ssl/private-copy /etc/ssl/private; \
+	chmod -R 0700 /etc/ssl/private; \
+	chown -R postgres /etc/ssl/private
+
 # install facete
 RUN apt-get install -qy dbconfig-common xsltproc tomcat7
 ADD install_facete2.sh /install_facete2.sh
