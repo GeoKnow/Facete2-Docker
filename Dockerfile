@@ -1,4 +1,4 @@
-FROM ubuntu:14.04
+FROM eccenca/baseimage:1.0.1
 
 MAINTAINER René Pietzsch <rpietzsch@gmail.com>
 
